@@ -19,5 +19,5 @@ export class Topic {
   
   @JoinTable({name: 'topics_attachments'})
   @ManyToMany(() => Attachment)
-  attachments: Attachment[]
+  attachments: Attachment[];
 }

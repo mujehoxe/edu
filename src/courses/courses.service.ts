@@ -17,7 +17,8 @@ export class CoursesService {
   }
 
   async findById(id: number): Promise<Course> {
-    const course = await this.coursesRepository.findOne({ where: { id }, relations: ['topics'] });
+    const course = await this.coursesRepository.findOne(
+      { where: { id }, relations: ['topics'] });
     if (!course) {
       throw new NotFoundException(`Course with id #${id} not found.`)
     }

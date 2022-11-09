@@ -1,3 +1,4 @@
+import { Topic } from 'src/topics/topic.entity';
 import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
@@ -25,4 +26,5 @@ export class Attachment {
    
   @UpdateDateColumn()
   updatedDate: Date;
+  
 }

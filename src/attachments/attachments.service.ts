@@ -1,6 +1,5 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TopicsService } from 'src/topics/topics.service';
 import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Attachment } from './attachment.entity';
 import { UpdateAttachmentDto } from './dto/update-attachment.dto';
@@ -14,9 +13,6 @@ export class AttachmentsService {
   constructor(
     @InjectRepository(Attachment)
     private attachmentsRepository: Repository<Attachment>,
-
-    @Inject(TopicsService)
-    private readonly topicsService: TopicsService,
   ) { }
 
   private readonly hash = crypto.createHash('md5');

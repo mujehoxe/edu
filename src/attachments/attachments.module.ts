@@ -6,8 +6,8 @@ import { AttachmentsController } from './attachments.controller';
 import { AttachmentsService } from './attachments.service';
 
 @Module({
-  imports: [TopicsModule, TypeOrmModule.forFeature([Attachment])],
-  exports: [TypeOrmModule],
+  imports: [TypeOrmModule.forFeature([Attachment])],
+  exports: [AttachmentsService, TypeOrmModule],
   controllers: [AttachmentsController],
   providers: [AttachmentsService]
 })

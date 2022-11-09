@@ -1,10 +1,11 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Topic } from './topic.entity';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { CoursesService } from 'src/courses/courses.service';
+import { AttachmentsService } from 'src/attachments/attachments.service';
 
 @Injectable()
 export class TopicsService {
@@ -14,6 +15,9 @@ export class TopicsService {
 
     @Inject(CoursesService)
     private readonly coursesService: CoursesService,
+    
+    @Inject(AttachmentsService)
+    private readonly attachmentsService: AttachmentsService,
   ) { }
 
   findAll(): Promise<Topic[]> {
@@ -21,7 +25,8 @@ export class TopicsService {
   }
 
   async findById(id: number): Promise<Topic> {
-    const topic = await this.topicsRepository.findOneBy({ id });
+    const topic = await this.topicsRepository.findOne(
+      { where: { id }, relations: ['attachments'] });
     if (!topic) {
       throw new NotFoundException(`Topic with id #${id} not found.`)
     }
@@ -42,6 +47,18 @@ export class TopicsService {
   async update(id: number, updateTopicDto: UpdateTopicDto)
     : Promise<UpdateResult> {
     return await this.topicsRepository.update(id, updateTopicDto);
+  }
+
+  async linkAttachment(topicId: number, attachmentId: number)
+    {
+    const topic = await this.findById(topicId);
+    const attachment = await this.attachmentsService.findById(attachmentId);
+
+    if (topic.attachments.indexOf(attachment) == -1)
+      throw new ConflictException(`attachment is already linked`)
+
+    topic.attachments.push(attachment)
+    return await this.topicsRepository.save(topic);
   }
 
   async delete(id: number): Promise<DeleteResult> {

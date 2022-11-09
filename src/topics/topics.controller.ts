@@ -29,6 +29,12 @@ export class TopicsController {
     return this.topicsService.update(id, updateTopicDto);
   }
 
+  @Patch('link-attachment/:topicId/:attachmentId')
+  async linkAttachment(@Param('topicId') topicId: number,
+    @Param('attachmentId') attachmentId: number) {
+    return this.topicsService.linkAttachment(topicId, attachmentId);
+  }
+
   @Delete(':id')
   async detete(@Param('id') id: number) {
     return this.topicsService.delete(id);
