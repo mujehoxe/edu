@@ -1,10 +1,14 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TopicsService } from 'src/topics/topics.service';
 import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Attachment } from './attachment.entity';
 import { CreateAttachmentDto } from './dto/create-attachment.dto';
 import { UpdateAttachmentDto } from './dto/update-attachment.dto';
-import { CoursesService } from 'src/courses/courses.service';
+
+import * as crypto from "crypto";
+import * as fs from 'fs';
+
 
 @Injectable()
 export class AttachmentsService {
@@ -12,9 +16,11 @@ export class AttachmentsService {
     @InjectRepository(Attachment)
     private attachmentsRepository: Repository<Attachment>,
 
-    @Inject(CoursesService)
-    private readonly topicsService: CoursesService,
+    @Inject(TopicsService)
+    private readonly topicsService: TopicsService,
   ) { }
+
+  private readonly hash = crypto.createHash('md5');
 
   findAll(): Promise<Attachment[]> {
     return this.attachmentsRepository.find();
@@ -28,14 +34,18 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async create(createAttachmentDto: CreateAttachmentDto): Promise<InsertResult> {
-    const course = await this.topicsService.findById(createAttachmentDto.topicId)
+  async create(file: Express.Multer.File): Promise<InsertResult> {
+    const date = new Date();
 
     const attachment = this.attachmentsRepository.create({
-      ...createAttachmentDto,
-      course
+      name: file.originalname,
+      encoding: file.encoding,
+      mimetype: file.mimetype,
+      path: file.path,
+      size: file.size,
+      createdDate: date,
+      updatedDate: date
     });
-
     return await this.attachmentsRepository.insert(attachment);
   }
 
@@ -44,7 +54,21 @@ export class AttachmentsService {
     return await this.attachmentsRepository.update(id, updateAttachmentDto);
   }
 
-  async delete(id: number): Promise<DeleteResult> {
+  async deleteFromDb(id: number): Promise<DeleteResult> {
     return await this.attachmentsRepository.delete(id);
+  }
+
+  async removeFile(attachmentId) {
+    const attachment = await this.findById(attachmentId);
+    if (attachment) {
+      try {
+        await fs.promises.unlink(attachment.path)
+      }
+      catch (err) {
+        throw err
+      }
+    }
+
+    return this.deleteFromDb(attachmentId);
   }
 }

@@ -1,5 +1,4 @@
-import { Topic } from 'src/topics/topic.entity';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Attachment {
@@ -8,10 +7,22 @@ export class Attachment {
 
   @Column()
   name: string;
+  
+  @Column()
+  encoding: string;
+  
+  @Column()
+  mimetype: string;
 
   @Column()
   path: string;
+  
+  @Column()
+  size: number;
 
-  @ManyToMany(type => Topic, topic => topic.attachments)
-  topics: Topic[]
+  @CreateDateColumn()
+  createdDate: Date;
+   
+  @UpdateDateColumn()
+  updatedDate: Date;
 }

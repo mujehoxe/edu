@@ -7,7 +7,7 @@ import { TopicsService } from './topics.service';
 
 @Module({
   imports: [CoursesModule, TypeOrmModule.forFeature([Topic])],
-  exports: [TypeOrmModule],
+  exports: [TopicsService, TypeOrmModule],
   controllers: [TopicsController],
   providers: [TopicsService]
 })

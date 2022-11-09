@@ -6,5 +6,5 @@ export class CreateAttachmentDto {
   readonly name: string;
 
   @IsNumber()
-  readonly topicId: number;
+  readonly size: number;
 }

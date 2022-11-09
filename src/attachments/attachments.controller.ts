@@ -1,16 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { CreateAttachmentDto } from './dto/create-attachment.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException, GoneException, NotFoundException } from '@nestjs/common';
 import { AttachmentsService } from './attachments.service';
 import { Attachment } from './attachment.entity';
 import { UpdateAttachmentDto } from './dto/update-attachment.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 
 @Controller('attachments')
 export class AttachmentsController {
   constructor(private attachmentsService: AttachmentsService) { }
 
   @Post()
-  async create(@Body() createAttachmentDto: CreateAttachmentDto) {
-    return this.attachmentsService.create(createAttachmentDto);
+  @UseInterceptors(FileInterceptor('file', {dest: 'uploads/attachments'}))
+  upload(@UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+    return this.attachmentsService.create(file);
   }
 
   @Get()
@@ -23,14 +26,16 @@ export class AttachmentsController {
     return this.attachmentsService.findById(id);
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: number,
-    @Body() updateAttachmentDto: UpdateAttachmentDto) {
-    return this.attachmentsService.update(id, updateAttachmentDto);
-  }
-
   @Delete(':id')
   async detete(@Param('id') id: number) {
-    return this.attachmentsService.delete(id);
+    try{
+      return await this.attachmentsService.removeFile(id);
+    }
+    catch (err) {
+      console.log(err)
+      if (err.code === 'ENOENT'){
+        throw new NotFoundException("Attachment not found on the server");
+      }
+    }
   }
 }
