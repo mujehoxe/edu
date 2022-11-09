@@ -19,8 +19,8 @@ export class TopicsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Topic> {
-    return this.topicsService.findOne(id);
+  async findById(@Param('id') id: number): Promise<Topic> {
+    return this.topicsService.findById(id);
   }
 
   @Patch(':id')

@@ -20,7 +20,7 @@ export class TopicsService {
     return this.topicsRepository.find();
   }
 
-  async findOne(id: number): Promise<Topic> {
+  async findById(id: number): Promise<Topic> {
     const topic = await this.topicsRepository.findOneBy({ id });
     if (!topic) {
       throw new NotFoundException(`Topic with id #${id} not found.`)
