@@ -10,22 +10,22 @@ export class CoursesController {
 
   @Post()
   async create(@Body() createCourseDto: CreateCourseDto) {
-    this.coursesService.create(createCourseDto);
+    return this.coursesService.create(createCourseDto);
   }
 
   @Get()
   async findAll(): Promise<Course[]> {
     return this.coursesService.findAll();
   }
-  
+
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Course> {
-    return this.coursesService.findOne(id);
+    return this.coursesService.findById(id);
   }
 
   @Patch(':id')
   async update(@Param('id') id: number,
-      @Body() updateCourseDto: UpdateCourseDto) {
+    @Body() updateCourseDto: UpdateCourseDto) {
     return this.coursesService.update(id, updateCourseDto);
   }
 

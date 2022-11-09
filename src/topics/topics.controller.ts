@@ -17,7 +17,7 @@ export class TopicsController {
   async findAll(): Promise<Topic[]> {
     return this.topicsService.findAll();
   }
-  
+
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Topic> {
     return this.topicsService.findOne(id);
@@ -25,7 +25,7 @@ export class TopicsController {
 
   @Patch(':id')
   async update(@Param('id') id: number,
-      @Body() updateTopicDto: UpdateTopicDto) {
+    @Body() updateTopicDto: UpdateTopicDto) {
     return this.topicsService.update(id, updateTopicDto);
   }
 

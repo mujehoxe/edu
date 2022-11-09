@@ -14,7 +14,7 @@ export class TopicsService {
 
     @Inject(CoursesService)
     private readonly coursesService: CoursesService,
-  ) {}
+  ) { }
 
   findAll(): Promise<Topic[]> {
     return this.topicsRepository.find();
@@ -22,25 +22,25 @@ export class TopicsService {
 
   async findOne(id: number): Promise<Topic> {
     const topic = await this.topicsRepository.findOneBy({ id });
-    if(!topic){
+    if (!topic) {
       throw new NotFoundException(`Topic with id #${id} not found.`)
     }
     return topic;
   }
 
   async create(createTopicDto: CreateTopicDto): Promise<InsertResult> {
-    const course = await this.coursesService.findOne(createTopicDto.courseId)
+    const course = await this.coursesService.findById(createTopicDto.courseId)
 
     const topic = this.topicsRepository.create({
       ...createTopicDto,
       course
     });
-    
+
     return await this.topicsRepository.insert(topic);
   }
-  
+
   async update(id: number, updateTopicDto: UpdateTopicDto)
-      : Promise<UpdateResult> {
+    : Promise<UpdateResult> {
     return await this.topicsRepository.update(id, updateTopicDto);
   }
 

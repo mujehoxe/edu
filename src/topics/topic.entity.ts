@@ -9,10 +9,10 @@ export class Topic {
   @Column()
   title: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   description: string;
-  
-  @ManyToOne(() => Course, (course) => course.topics, 
-    {onDelete: "CASCADE", orphanedRowAction: 'delete'})
+
+  @ManyToOne(() => Course, (course) => course.topics,
+    { onDelete: "CASCADE", orphanedRowAction: 'delete' })
   course: Course
 }
