@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TopicsService } from 'src/topics/topics.service';
 import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Attachment } from './attachment.entity';
-import { CreateAttachmentDto } from './dto/create-attachment.dto';
 import { UpdateAttachmentDto } from './dto/update-attachment.dto';
 
 import * as crypto from "crypto";

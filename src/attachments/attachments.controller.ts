@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException, GoneException, NotFoundException } from '@nestjs/common';
 import { AttachmentsService } from './attachments.service';
 import { Attachment } from './attachment.entity';
-import { UpdateAttachmentDto } from './dto/update-attachment.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 
