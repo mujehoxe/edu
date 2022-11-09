@@ -1,5 +1,6 @@
+import { Attachment } from 'src/attachments/attachment.entity';
 import { Course } from 'src/courses/course.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity()
 export class Topic {
@@ -15,4 +16,8 @@ export class Topic {
   @ManyToOne(() => Course, (course) => course.topics,
     { onDelete: "CASCADE", orphanedRowAction: 'delete' })
   course: Course
+  
+  @JoinTable()
+  @ManyToMany(type => Attachment, attachment => attachment.topics)
+  attachments: Attachment[]
 }

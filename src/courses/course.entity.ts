@@ -12,6 +12,6 @@ export class Course {
   @Column({nullable: true})
   description: string;
   
-  @OneToMany(type => Topic, topic => topic.course, {eager: true})
+  @OneToMany(type => Topic, topic => topic.course)
   topics: Topic[];
 }
