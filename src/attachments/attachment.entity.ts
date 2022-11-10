@@ -27,9 +27,6 @@ export class Attachment {
   @CreateDateColumn()
   createdDate: Date;
    
-  @UpdateDateColumn()
-  updatedDate: Date;
-  
   @ManyToOne(() => Topic, (topic) => topic.attachments)
   topic: Topic;
   
