@@ -7,6 +7,7 @@ import { UpdateTopicDto } from './dto/update-topic.dto';
 import { CoursesService } from 'src/courses/courses.service';
 import { AttachmentsService } from 'src/attachments/attachments.service';
 
+
 @Injectable()
 export class TopicsService {
   constructor(
@@ -49,15 +50,21 @@ export class TopicsService {
     return await this.topicsRepository.update(id, updateTopicDto);
   }
 
-  async linkAttachment(topicId: number, attachmentId: number)
-    {
+  async linkAttachment(topicId: number, file: Express.Multer.File) {
+    
+    const filename = this.attachmentsService.generateFileName(file, topicId)
+
     const topic = await this.findById(topicId);
-    const attachment = await this.attachmentsService.findById(attachmentId);
 
-    if (topic.attachments.indexOf(attachment) == -1)
-      throw new ConflictException(`attachment is already linked`)
+    if (topic.IsAttachmentLinked(filename))
+      throw new ConflictException(`The same attachment was already linked.`)
 
-    topic.attachments.push(attachment)
+    await this.attachmentsService.writeFile(file, filename);
+
+    const attachment = await this.attachmentsService.create(file);
+
+    topic.attachments.push(attachment);
+
     return await this.topicsRepository.save(topic);
   }
 

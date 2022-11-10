@@ -1,6 +1,6 @@
 import { Attachment } from 'src/attachments/attachment.entity';
 import { Course } from 'src/courses/course.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Topic {
@@ -16,8 +16,18 @@ export class Topic {
   @ManyToOne(() => Course, (course) => course.topics,
     { onDelete: 'CASCADE', orphanedRowAction: 'delete' })
   course: Course
-  
-  @JoinTable({name: 'topics_attachments'})
-  @ManyToMany(() => Attachment)
+
+  @OneToMany(() => Attachment,
+    (attchment) => attchment.topic,
+    { cascade: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   attachments: Attachment[];
+
+  IsAttachmentLinked(filename: string) {
+    for(const attachment of this.attachments) {
+      if (filename === attachment.filename)
+        return true
+    }
+    return false;
+  }
+
 }

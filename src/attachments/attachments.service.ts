@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Attachment } from './attachment.entity';
@@ -15,7 +15,6 @@ export class AttachmentsService {
     private attachmentsRepository: Repository<Attachment>,
   ) { }
 
-  private readonly hash = crypto.createHash('md5');
 
   findAll(): Promise<Attachment[]> {
     return this.attachmentsRepository.find();
@@ -29,19 +28,17 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async create(file: Express.Multer.File): Promise<InsertResult> {
-    const date = new Date();
-
-    const attachment = this.attachmentsRepository.create({
-      name: file.originalname,
+  async create(file: Express.Multer.File): Promise<Attachment> {
+    const attachment: Attachment = await this.attachmentsRepository.create({
+      originalname: file.originalname,
       encoding: file.encoding,
       mimetype: file.mimetype,
-      path: file.path,
+      filename: file.filename,
+      destination: file.destination,
       size: file.size,
-      createdDate: date,
-      updatedDate: date
     });
-    return await this.attachmentsRepository.insert(attachment);
+
+    return attachment;
   }
 
   async update(id: number, updateAttachmentDto: UpdateAttachmentDto)
@@ -49,21 +46,60 @@ export class AttachmentsService {
     return await this.attachmentsRepository.update(id, updateAttachmentDto);
   }
 
-  async deleteFromDb(id: number): Promise<DeleteResult> {
+  async fileExists(filename) {
+    try {
+      await fs.promises.access(filename);
+      return true;
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        return false;
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  calculateHash(file: Express.Multer.File, topicId: number) {
+    const newBuffer = Buffer.concat(
+      [file.buffer
+        , Buffer.from(topicId.toString())
+        , Buffer.from(file.originalname)]);
+
+    const hash = crypto.createHash('md5');
+    hash.update(newBuffer);
+    return hash.digest('hex');
+  }
+
+  async writeFile(file: Express.Multer.File, name: string) {
+    try {
+      await fs.promises.writeFile(file.destination + file.filename, file.buffer)
+    }
+    catch (err) {
+      throw new InternalServerErrorException(`Couldn't create file.`);
+    }
+  }
+
+  generateFileName(file, topicId){
+    const filename = this.calculateHash(file, topicId); 
+    file.filename = filename;
+    file.destination = 'uploads/attachments/';
+    return filename;
+  }
+
+  async delete(id: number): Promise<DeleteResult>{
+    const attachment = await this.findById(id);
+    this.removeFile(attachment.getPath());
     return await this.attachmentsRepository.delete(id);
   }
 
-  async removeFile(attachmentId) {
-    const attachment = await this.findById(attachmentId);
-    if (attachment) {
-      try {
-        await fs.promises.unlink(attachment.path)
-      }
-      catch (err) {
-        throw err
+  async removeFile(filepath) {
+    try {
+      await fs.promises.unlink(filepath)
+    }
+    catch (err) {
+      if (err.code === 'ENOENT') {
+        throw new NotFoundException('File not found.')
       }
     }
-
-    return this.deleteFromDb(attachmentId);
   }
 }

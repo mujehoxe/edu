@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { TopicsService } from './topics.service';
 import { Topic } from './topic.entity';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('topics')
 export class TopicsController {
@@ -29,10 +30,12 @@ export class TopicsController {
     return this.topicsService.update(id, updateTopicDto);
   }
 
-  @Patch('link-attachment/:topicId/:attachmentId')
-  async linkAttachment(@Param('topicId') topicId: number,
-    @Param('attachmentId') attachmentId: number) {
-    return this.topicsService.linkAttachment(topicId, attachmentId);
+  @Post('link-attachment/:id')
+  @UseInterceptors(FileInterceptor('file'))
+  linkAttachment(@Param('id') topicId: number,
+    @UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+    return this.topicsService.linkAttachment(topicId, file);
   }
 
   @Delete(':id')

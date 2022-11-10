@@ -1,19 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException, GoneException, NotFoundException } from '@nestjs/common';
-import { AttachmentsService } from './attachments.service';
+import { Controller, Delete, Get, Param } from '@nestjs/common';
+import { DeleteResult } from 'typeorm';
 import { Attachment } from './attachment.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AttachmentsService } from './attachments.service';
 
 
 @Controller('attachments')
 export class AttachmentsController {
   constructor(private attachmentsService: AttachmentsService) { }
-
-  @Post()
-  @UseInterceptors(FileInterceptor('file', {dest: 'uploads/attachments'}))
-  upload(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
-    return this.attachmentsService.create(file);
-  }
 
   @Get()
   async findAll(): Promise<Attachment[]> {
@@ -26,15 +19,7 @@ export class AttachmentsController {
   }
 
   @Delete(':id')
-  async detete(@Param('id') id: number) {
-    try{
-      return await this.attachmentsService.removeFile(id);
-    }
-    catch (err) {
-      console.log(err)
-      if (err.code === 'ENOENT'){
-        throw new NotFoundException("Attachment not found on the server");
-      }
-    }
+  async delete(@Param('id') id: number): Promise<DeleteResult> {
+    return await this.attachmentsService.delete(id);
   }
 }
