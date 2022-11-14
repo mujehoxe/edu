@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { TopicsService } from './topics.service';
 import { Topic } from './topic.entity';
@@ -7,7 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('topics')
 export class TopicsController {
-  constructor(private topicsService: TopicsService) { }
+  constructor(private topicsService: TopicsService) {}
 
   @Post()
   async create(@Body() createTopicDto: CreateTopicDto) {
@@ -25,17 +36,30 @@ export class TopicsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number,
-    @Body() updateTopicDto: UpdateTopicDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() updateTopicDto: UpdateTopicDto,
+  ) {
     return this.topicsService.update(id, updateTopicDto);
   }
 
-  @Post('link-attachment/:id')
+  @Post(':topicId/link-attachment')
   @UseInterceptors(FileInterceptor('file'))
-  linkAttachment(@Param('id') topicId: number,
-    @UploadedFile() file: Express.Multer.File) {
-    console.log(file);
+  linkAttachment(
+    @Param('topicId') topicId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Please Provide a file');
+
     return this.topicsService.linkAttachment(topicId, file);
+  }
+
+  @Delete(':topicId/unlink-attachment/:attachmentId')
+  unlinkAttachment(
+    @Param('topicId') topicId: number,
+    @Param('attachmentId') attachmentId: number,
+  ) {
+    return this.topicsService.unlinkAttachment(topicId, attachmentId);
   }
 
   @Delete(':id')

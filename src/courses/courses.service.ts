@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './course.entity';
@@ -10,23 +14,25 @@ export class CoursesService {
   constructor(
     @InjectRepository(Course)
     private coursesRepository: Repository<Course>,
-  ) { }
+  ) {}
 
   findAll(): Promise<Course[]> {
     return this.coursesRepository.find();
   }
 
   async findById(id: number): Promise<Course> {
-    const course = await this.coursesRepository.findOne(
-      { where: { id }, relations: ['topics'] });
+    const course = await this.coursesRepository.findOne({
+      where: { id },
+      relations: ['topics'],
+    });
     if (!course) {
-      throw new NotFoundException(`Course with id #${id} not found.`)
+      throw new NotFoundException(`Course with id #${id} not found`);
     }
     return course;
   }
 
   async create(createCourseDto: CreateCourseDto) {
-    const { name } = createCourseDto
+    const { name } = createCourseDto;
     const course = await this.coursesRepository.findOne({ where: { name } });
 
     if (!course) {
@@ -34,7 +40,7 @@ export class CoursesService {
       return this.coursesRepository.insert(course);
     }
 
-    throw new ConflictException(`Course with name "${name}" already exists.`)
+    throw new ConflictException(`Course with name "${name}" already exists`);
   }
 
   async update(id: number, updateCourseDto: UpdateCourseDto) {

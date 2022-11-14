@@ -1,6 +1,12 @@
-import { Attachment } from 'src/attachments/attachment.entity';
+import { Attachment } from 'src/topics/attachment.entity';
 import { Course } from 'src/courses/course.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Topic {
@@ -13,21 +19,37 @@ export class Topic {
   @Column({ nullable: true })
   description: string;
 
-  @ManyToOne(() => Course, (course) => course.topics,
-    { onDelete: 'CASCADE', orphanedRowAction: 'delete' })
-  course: Course
+  @ManyToOne(() => Course, (course) => course.topics, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+  })
+  course: Course;
 
-  @OneToMany(() => Attachment,
-    (attchment) => attchment.topic,
-    { cascade: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @OneToMany(
+    () => Attachment,
+    (attchment) => {
+      return attchment.topic;
+    },
+    {
+      cascade: true,
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   attachments: Attachment[];
 
-  IsAttachmentLinked(filename: string) {
-    for(const attachment of this.attachments) {
-      if (filename === attachment.filename)
-        return true
+  findAttachmentById(attachmentId: number) {
+    for (const attachment of this.attachments) {
+      if (attachmentId === attachment.id) return attachment;
+    }
+
+    return null;
+  }
+
+  isAttachmentLinked(filename: string) {
+    for (const attachment of this.attachments) {
+      if (filename === attachment.file.filename) return true;
     }
     return false;
   }
-
 }

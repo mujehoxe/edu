@@ -1,15 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AttachmentsModule } from 'src/attachments/attachments.module';
+import { FilesModule } from 'src/files/files.module';
 import { CoursesModule } from 'src/courses/courses.module';
 import { Topic } from './topic.entity';
 import { TopicsController } from './topics.controller';
 import { TopicsService } from './topics.service';
+import { Attachment } from './attachment.entity';
 
 @Module({
-  imports: [CoursesModule, AttachmentsModule, TypeOrmModule.forFeature([Topic])],
+  imports: [
+    CoursesModule,
+    FilesModule,
+    TypeOrmModule.forFeature([Topic, Attachment]),
+  ],
   exports: [TypeOrmModule],
   controllers: [TopicsController],
-  providers: [TopicsService]
+  providers: [TopicsService],
 })
-export class TopicsModule { }
+export class TopicsModule {}
