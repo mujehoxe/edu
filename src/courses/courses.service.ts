@@ -1,9 +1,12 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LocalFile } from 'src/local-files/local-file.entity';
+import { LocalFilesService } from 'src/local-files/local-files.service';
 import { Repository } from 'typeorm';
 import { Course } from './course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -14,6 +17,9 @@ export class CoursesService {
   constructor(
     @InjectRepository(Course)
     private coursesRepository: Repository<Course>,
+
+    @Inject(LocalFilesService)
+    private readonly filesService: LocalFilesService,
   ) {}
 
   findAll(): Promise<Course[]> {
@@ -25,9 +31,8 @@ export class CoursesService {
       where: { id },
       relations: ['topics'],
     });
-    if (!course) {
-      throw new NotFoundException(`Course with id #${id} not found`);
-    }
+    if (!course) throw new NotFoundException(`Course #${id} not found`);
+
     return course;
   }
 
@@ -45,6 +50,21 @@ export class CoursesService {
 
   async update(id: number, updateCourseDto: UpdateCourseDto) {
     await this.coursesRepository.update(id, updateCourseDto);
+  }
+
+  async linkThumbnail(courseId: number, file: Express.Multer.File) {
+    const course = await this.findById(courseId);
+
+    let oldThumbnailId = -1;
+    if (course.thumbnailId) oldThumbnailId = course.thumbnailId;
+
+    course.thumbnail = new LocalFile(file);
+    course.thumbnailId = course.thumbnail.id;
+    const res = await this.coursesRepository.save(course);
+
+    if (oldThumbnailId > -1) this.filesService.delete(oldThumbnailId);
+
+    return res;
   }
 
   async delete(id: number): Promise<void> {

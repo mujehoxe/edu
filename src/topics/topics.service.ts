@@ -10,7 +10,7 @@ import { Topic } from './topic.entity';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { CoursesService } from 'src/courses/courses.service';
-import { FilesService } from 'src/files/files.service';
+import { LocalFilesService } from 'src/local-files/local-files.service';
 import { Attachment } from './attachment.entity';
 
 @Injectable()
@@ -25,8 +25,8 @@ export class TopicsService {
     @Inject(CoursesService)
     private readonly coursesService: CoursesService,
 
-    @Inject(FilesService)
-    private readonly filesService: FilesService,
+    @Inject(LocalFilesService)
+    private readonly filesService: LocalFilesService,
   ) {}
 
   findAll(): Promise<Topic[]> {
@@ -63,7 +63,11 @@ export class TopicsService {
   }
 
   async linkAttachment(topicId: number, file: Express.Multer.File) {
-    const filename = this.filesService.generateFileName(file, topicId);
+    const filename = this.filesService.generateFileName(
+      file,
+      '/uploads/attachments',
+      topicId,
+    );
 
     const topic = await this.findById(topicId);
 

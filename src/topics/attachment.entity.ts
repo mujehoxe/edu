@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Topic } from './topic.entity';
-import { File } from 'src/files/file.entity';
+import { LocalFile } from 'src/local-files/local-file.entity';
 
 @Entity()
 export class Attachment {
@@ -14,8 +14,8 @@ export class Attachment {
   id: number;
 
   @JoinColumn()
-  @OneToOne(() => File, { onDelete: 'CASCADE', eager: true })
-  file: File;
+  @OneToOne(() => LocalFile, { onDelete: 'CASCADE', eager: true })
+  file: LocalFile;
 
   @ManyToOne(() => Topic, (topic) => topic.attachments, {
     onDelete: 'CASCADE',

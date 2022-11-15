@@ -8,7 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  BadRequestException,
+  ParseFilePipe,
 } from '@nestjs/common';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { TopicsService } from './topics.service';
@@ -47,10 +47,9 @@ export class TopicsController {
   @UseInterceptors(FileInterceptor('file'))
   linkAttachment(
     @Param('topicId') topicId: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(new ParseFilePipe({ fileIsRequired: true }))
+    file: Express.Multer.File,
   ) {
-    if (!file) throw new BadRequestException('Please Provide a file');
-
     return this.topicsService.linkAttachment(topicId, file);
   }
 

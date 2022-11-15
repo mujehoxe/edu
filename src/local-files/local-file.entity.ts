@@ -6,7 +6,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class File {
+export class LocalFile {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,6 +30,19 @@ export class File {
 
   @CreateDateColumn()
   createdDate: Date;
+
+  constructor();
+  constructor(file: Express.Multer.File);
+  constructor(file?: Express.Multer.File) {
+    if (file) {
+      this.originalname = file.originalname;
+      this.encoding = file.encoding;
+      this.mimetype = file.mimetype;
+      this.filename = file.filename;
+      this.destination = file.destination;
+      this.size = file.size;
+    }
+  }
 
   getPath() {
     return this.destination + this.filename;

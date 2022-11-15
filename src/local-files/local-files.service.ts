@@ -5,50 +5,42 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { File } from './file.entity';
-import { UpdateAttachmentDto } from './dto/update-attachment.dto';
+import { LocalFile } from './local-file.entity';
+import { UpdateLocalFileDto } from './dto/update-local-file.dto';
 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
 @Injectable()
-export class FilesService {
+export class LocalFilesService {
   constructor(
-    @InjectRepository(File)
-    private filesRepository: Repository<File>,
+    @InjectRepository(LocalFile)
+    private filesRepository: Repository<LocalFile>,
   ) {}
 
-  findAll(): Promise<File[]> {
+  findAll(): Promise<LocalFile[]> {
     return this.filesRepository.find();
   }
 
-  async findById(id: number): Promise<File> {
+  async findById(id: number): Promise<LocalFile> {
     const attachment = await this.filesRepository.findOneBy({ id });
     if (!attachment) {
-      throw new NotFoundException(`Attachment with id #${id} not found`);
+      throw new NotFoundException(`File #${id} not found`);
     }
     return attachment;
   }
 
-  async create(file: Express.Multer.File): Promise<File> {
-    const persistFile = await this.filesRepository.create({
-      originalname: file.originalname,
-      encoding: file.encoding,
-      mimetype: file.mimetype,
-      filename: file.filename,
-      destination: file.destination,
-      size: file.size,
-    });
-
+  async create(file: Express.Multer.File): Promise<LocalFile> {
+    const persistFile = await this.filesRepository.create(new LocalFile(file));
     this.filesRepository.save(persistFile);
     return persistFile;
   }
 
   async update(
     id: number,
-    updateAttachmentDto: UpdateAttachmentDto,
+    updateLocalFileDto: UpdateLocalFileDto,
   ): Promise<UpdateResult> {
-    return await this.filesRepository.update(id, updateAttachmentDto);
+    return await this.filesRepository.update(id, updateLocalFileDto);
   }
 
   async doesFileExists(path) {
@@ -101,10 +93,10 @@ export class FilesService {
     }
   }
 
-  generateFileName(file, topicId) {
+  generateFileName(file, destination, topicId) {
     const filename = this.calculateHash(file, topicId);
     file.filename = filename;
-    file.destination = 'uploads/attachments/';
+    file.destination = destination;
     return filename;
   }
 

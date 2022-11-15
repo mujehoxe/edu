@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CoursesModule } from './courses/courses.module';
 import { TopicsModule } from './topics/topics.module';
-import { FilesModule } from './files/files.module';
+import { LocalFilesModule } from './local-files/local-files.module';
 
 @Module({
   imports: [
@@ -20,9 +18,7 @@ import { FilesModule } from './files/files.module';
     }),
     CoursesModule,
     TopicsModule,
-    FilesModule,
+    LocalFilesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
