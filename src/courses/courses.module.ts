@@ -6,9 +6,9 @@ import { CoursesController } from './courses.controller';
 import { CoursesService } from './courses.service';
 
 @Module({
-  imports: [LocalFilesModule, TypeOrmModule.forFeature([Course])],
-  exports: [CoursesService, TypeOrmModule],
-  controllers: [CoursesController],
-  providers: [CoursesService],
+	imports: [LocalFilesModule, TypeOrmModule.forFeature([Course])],
+	exports: [CoursesService, TypeOrmModule],
+	controllers: [CoursesController],
+	providers: [CoursesService],
 })
 export class CoursesModule {}

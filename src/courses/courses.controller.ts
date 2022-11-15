@@ -1,16 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseInterceptors,
-  UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
-  BadRequestException,
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Param,
+	Delete,
+	UseInterceptors,
+	UploadedFile,
+	ParseFilePipe,
+	FileTypeValidator,
+	BadRequestException,
 } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CoursesService } from './courses.service';
@@ -21,55 +21,55 @@ import { diskStorage } from 'multer';
 
 @Controller('courses')
 export class CoursesController {
-  constructor(private coursesService: CoursesService) {}
+	constructor(private coursesService: CoursesService) {}
 
-  @Post()
-  async create(@Body() createCourseDto: CreateCourseDto) {
-    return this.coursesService.create(createCourseDto);
-  }
+	@Post()
+	async create(@Body() createCourseDto: CreateCourseDto) {
+		return this.coursesService.create(createCourseDto);
+	}
 
-  @Get()
-  async findAll(): Promise<Course[]> {
-    return this.coursesService.findAll();
-  }
+	@Get()
+	async findAll(): Promise<Course[]> {
+		return this.coursesService.findAll();
+	}
 
-  @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Course> {
-    return this.coursesService.findById(id);
-  }
+	@Get(':id')
+	async findOne(@Param('id') id: number): Promise<Course> {
+		return this.coursesService.findById(id);
+	}
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() updateCourseDto: UpdateCourseDto,
-  ) {
-    return this.coursesService.update(id, updateCourseDto);
-  }
+	@Patch(':id')
+	async update(
+		@Param('id') id: number,
+		@Body() updateCourseDto: UpdateCourseDto,
+	) {
+		return this.coursesService.update(id, updateCourseDto);
+	}
 
-  @Post(':courseId/link-thumbnail')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({ destination: 'uploads/thumbnails/' }),
-    }),
-  )
-  linkThumbnail(
-    @Param('courseId') courseId: number,
-    @UploadedFile(
-      new ParseFilePipe({
-        fileIsRequired: true,
-        exceptionFactory(err) {
-          if (err) throw new BadRequestException('Must provide an image');
-        },
-        validators: [new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ })],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.coursesService.linkThumbnail(courseId, file);
-  }
+	@Post(':courseId/link-thumbnail')
+	@UseInterceptors(
+		FileInterceptor('file', {
+			storage: diskStorage({ destination: 'uploads/thumbnails/' }),
+		}),
+	)
+	linkThumbnail(
+		@Param('courseId') courseId: number,
+		@UploadedFile(
+			new ParseFilePipe({
+				fileIsRequired: true,
+				exceptionFactory(err) {
+					if (err) throw new BadRequestException('Must provide an image');
+				},
+				validators: [new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ })],
+			}),
+		)
+		file: Express.Multer.File,
+	) {
+		return this.coursesService.linkThumbnail(courseId, file);
+	}
 
-  @Delete(':id')
-  async detete(@Param('id') id: number) {
-    return this.coursesService.delete(id);
-  }
+	@Delete(':id')
+	async detete(@Param('id') id: number) {
+		return this.coursesService.delete(id);
+	}
 }

@@ -8,13 +8,13 @@ import { TopicsService } from './topics.service';
 import { Attachment } from './attachment.entity';
 
 @Module({
-  imports: [
-    CoursesModule,
-    LocalFilesModule,
-    TypeOrmModule.forFeature([Topic, Attachment]),
-  ],
-  exports: [TypeOrmModule],
-  controllers: [TopicsController],
-  providers: [TopicsService],
+	imports: [
+		CoursesModule,
+		LocalFilesModule,
+		TypeOrmModule.forFeature([Topic, Attachment]),
+	],
+	exports: [TypeOrmModule],
+	controllers: [TopicsController],
+	providers: [TopicsService],
 })
 export class TopicsModule {}

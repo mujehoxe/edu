@@ -1,8 +1,8 @@
 import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
+	ConflictException,
+	Inject,
+	Injectable,
+	NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
@@ -15,93 +15,93 @@ import { Attachment } from './attachment.entity';
 
 @Injectable()
 export class TopicsService {
-  constructor(
-    @InjectRepository(Topic)
-    private topicsRepository: Repository<Topic>,
+	constructor(
+		@InjectRepository(Topic)
+		private topicsRepository: Repository<Topic>,
 
-    @InjectRepository(Attachment)
-    private attachmentsRepository: Repository<Attachment>,
+		@InjectRepository(Attachment)
+		private attachmentsRepository: Repository<Attachment>,
 
-    @Inject(CoursesService)
-    private readonly coursesService: CoursesService,
+		@Inject(CoursesService)
+		private readonly coursesService: CoursesService,
 
-    @Inject(LocalFilesService)
-    private readonly filesService: LocalFilesService,
-  ) {}
+		@Inject(LocalFilesService)
+		private readonly filesService: LocalFilesService,
+	) {}
 
-  findAll(): Promise<Topic[]> {
-    return this.topicsRepository.find();
-  }
+	findAll(): Promise<Topic[]> {
+		return this.topicsRepository.find();
+	}
 
-  async findById(id: number): Promise<Topic> {
-    const topic = await this.topicsRepository.findOne({
-      where: { id },
-      relations: ['attachments'],
-    });
-    if (!topic) {
-      throw new NotFoundException(`Topic #${id} not found`);
-    }
-    return topic;
-  }
+	async findById(id: number): Promise<Topic> {
+		const topic = await this.topicsRepository.findOne({
+			where: { id },
+			relations: ['attachments'],
+		});
+		if (!topic) {
+			throw new NotFoundException(`Topic #${id} not found`);
+		}
+		return topic;
+	}
 
-  async create(createTopicDto: CreateTopicDto): Promise<InsertResult> {
-    const course = await this.coursesService.findById(createTopicDto.courseId);
+	async create(createTopicDto: CreateTopicDto): Promise<InsertResult> {
+		const course = await this.coursesService.findById(createTopicDto.courseId);
 
-    const topic = this.topicsRepository.create({
-      ...createTopicDto,
-      course,
-    });
+		const topic = this.topicsRepository.create({
+			...createTopicDto,
+			course,
+		});
 
-    return await this.topicsRepository.insert(topic);
-  }
+		return await this.topicsRepository.insert(topic);
+	}
 
-  async update(
-    id: number,
-    updateTopicDto: UpdateTopicDto,
-  ): Promise<UpdateResult> {
-    return await this.topicsRepository.update(id, updateTopicDto);
-  }
+	async update(
+		id: number,
+		updateTopicDto: UpdateTopicDto,
+	): Promise<UpdateResult> {
+		return await this.topicsRepository.update(id, updateTopicDto);
+	}
 
-  async linkAttachment(topicId: number, file: Express.Multer.File) {
-    const filename = this.filesService.generateFileName(
-      file,
-      '/uploads/attachments',
-      topicId,
-    );
+	async linkAttachment(topicId: number, file: Express.Multer.File) {
+		const filename = this.filesService.generateFileName(
+			file,
+			'/uploads/attachments',
+			topicId,
+		);
 
-    const topic = await this.findById(topicId);
+		const topic = await this.findById(topicId);
 
-    if (topic.isAttachmentLinked(filename))
-      throw new ConflictException(`The same attachment was already linked`);
+		if (topic.isAttachmentLinked(filename))
+			throw new ConflictException(`The same attachment was already linked`);
 
-    const attachment = new Attachment();
+		const attachment = new Attachment();
 
-    attachment.file = await this.filesService.create(file);
+		attachment.file = await this.filesService.create(file);
 
-    topic.attachments.push(attachment);
+		topic.attachments.push(attachment);
 
-    await this.filesService.writeFile(file);
+		await this.filesService.writeFile(file);
 
-    return await this.topicsRepository.save(topic);
-  }
+		return await this.topicsRepository.save(topic);
+	}
 
-  async unlinkAttachment(topicId: number, attachmentId: any) {
-    const topic = await this.findById(topicId);
+	async unlinkAttachment(topicId: number, attachmentId: any) {
+		const topic = await this.findById(topicId);
 
-    const attachment = topic.findAttachmentById(attachmentId);
+		const attachment = topic.findAttachmentById(attachmentId);
 
-    if (!attachment)
-      throw new NotFoundException(
-        `No Attachment ${attachmentId} not associated with topic ${topicId}`,
-      );
+		if (!attachment)
+			throw new NotFoundException(
+				`No Attachment ${attachmentId} not associated with topic ${topicId}`,
+			);
 
-    const res = await this.attachmentsRepository.delete(attachmentId);
-    await this.filesService.delete(attachment.file.id);
+		const res = await this.attachmentsRepository.delete(attachmentId);
+		await this.filesService.delete(attachment.file.id);
 
-    return res;
-  }
+		return res;
+	}
 
-  async delete(id: number): Promise<DeleteResult> {
-    return await this.topicsRepository.delete(id);
-  }
+	async delete(id: number): Promise<DeleteResult> {
+		return await this.topicsRepository.delete(id);
+	}
 }
