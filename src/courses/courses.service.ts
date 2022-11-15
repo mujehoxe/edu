@@ -1,8 +1,8 @@
 import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
+	ConflictException,
+	Inject,
+	Injectable,
+	NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LocalFile } from 'src/local-files/local-file.entity';
@@ -14,60 +14,59 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 
 @Injectable()
 export class CoursesService {
-  constructor(
-    @InjectRepository(Course)
-    private coursesRepository: Repository<Course>,
+	constructor(
+		@InjectRepository(Course)
+		private coursesRepository: Repository<Course>,
 
-    @Inject(LocalFilesService)
-    private readonly filesService: LocalFilesService,
-  ) {}
+		@Inject(LocalFilesService)
+		private readonly filesService: LocalFilesService,
+	) {}
 
-  findAll(): Promise<Course[]> {
-    return this.coursesRepository.find();
-  }
+	findAll(): Promise<Course[]> {
+		return this.coursesRepository.find();
+	}
 
-  async findById(id: number): Promise<Course> {
-    const course = await this.coursesRepository.findOne({
-      where: { id },
-      relations: ['topics'],
-    });
-    if (!course) throw new NotFoundException(`Course #${id} not found`);
+	async findById(id: number): Promise<Course> {
+		const course = await this.coursesRepository.findOne({
+			where: { id },
+			relations: ['topics'],
+		});
+		if (!course) throw new NotFoundException(`Course #${id} not found`);
 
-    return course;
-  }
+		return course;
+	}
 
-  async create(createCourseDto: CreateCourseDto) {
-    const { name } = createCourseDto;
-    const course = await this.coursesRepository.findOne({ where: { name } });
+	async create(createCourseDto: CreateCourseDto) {
+		const { name } = createCourseDto;
+		const course = await this.coursesRepository.findOne({ where: { name } });
 
-    if (!course) {
-      const course = this.coursesRepository.create(createCourseDto);
-      return this.coursesRepository.insert(course);
-    }
+		if (!course) {
+			const course = this.coursesRepository.create(createCourseDto);
+			return this.coursesRepository.insert(course);
+		}
 
-    throw new ConflictException(`Course with name "${name}" already exists`);
-  }
+		throw new ConflictException(`Course with name "${name}" already exists`);
+	}
 
-  async update(id: number, updateCourseDto: UpdateCourseDto) {
-    await this.coursesRepository.update(id, updateCourseDto);
-  }
+	async update(id: number, updateCourseDto: UpdateCourseDto) {
+		await this.coursesRepository.update(id, updateCourseDto);
+	}
 
-  async linkThumbnail(courseId: number, file: Express.Multer.File) {
-    const course = await this.findById(courseId);
+	async linkThumbnail(courseId: number, file: Express.Multer.File) {
+		const course = await this.findById(courseId);
 
-    let oldThumbnailId = -1;
-    if (course.thumbnailId) oldThumbnailId = course.thumbnailId;
+		const oldThumbnailId = course.thumbnailId ?? -1;
 
-    course.thumbnail = new LocalFile(file);
-    course.thumbnailId = course.thumbnail.id;
-    const res = await this.coursesRepository.save(course);
+		course.thumbnail = new LocalFile(file);
+		course.thumbnailId = course.thumbnail.id;
+		const res = await this.coursesRepository.save(course);
 
-    if (oldThumbnailId > -1) this.filesService.delete(oldThumbnailId);
+		if (oldThumbnailId > -1) this.filesService.delete(oldThumbnailId);
 
-    return res;
-  }
+		return res;
+	}
 
-  async delete(id: number): Promise<void> {
-    await this.coursesRepository.delete(id);
-  }
+	async delete(id: number): Promise<void> {
+		await this.coursesRepository.delete(id);
+	}
 }
