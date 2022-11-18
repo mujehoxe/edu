@@ -7,6 +7,8 @@ import {
 	OneToMany,
 	OneToOne,
 	JoinColumn,
+	UpdateDateColumn,
+	CreateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -15,10 +17,28 @@ export class Course {
 	id: number;
 
 	@Column({ unique: true })
-	name: string;
+	title: string;
 
 	@Column({ nullable: true })
 	description: string;
+
+	@Column({ nullable: true })
+	category: string;
+
+	@Column({ nullable: true })
+	level: string;
+
+	@Column({ nullable: true })
+	specialty: string;
+
+	@Column({ nullable: true })
+	instructor: string;
+
+	@CreateDateColumn()
+	createdDate: Date;
+
+	@UpdateDateColumn()
+	updatedDate: Date;
 
 	@JoinColumn()
 	@OneToOne(() => LocalFile, { nullable: true, cascade: true })
