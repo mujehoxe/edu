@@ -19,13 +19,30 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 
+const fileInterceptor = FileInterceptor('file', {
+	storage: diskStorage({ destination: 'uploads/thumbnails/' }),
+});
+
 @Controller('courses')
 export class CoursesController {
 	constructor(private coursesService: CoursesService) {}
 
 	@Post()
-	async create(@Body() createCourseDto: CreateCourseDto) {
-		return this.coursesService.create(createCourseDto);
+	@UseInterceptors(fileInterceptor)
+	async create(
+		@Body() createCourseDto: CreateCourseDto,
+		@UploadedFile(
+			new ParseFilePipe({
+				exceptionFactory(err) {
+					if (err)
+						throw new BadRequestException('Must provide a jpg, jpeg or png');
+				},
+				validators: [new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ })],
+			}),
+		)
+		thumnail: Express.Multer.File,
+	) {
+		return this.coursesService.create(createCourseDto, thumnail);
 	}
 
 	@Get()
@@ -47,11 +64,7 @@ export class CoursesController {
 	}
 
 	@Post(':courseId/link-thumbnail')
-	@UseInterceptors(
-		FileInterceptor('file', {
-			storage: diskStorage({ destination: 'uploads/thumbnails/' }),
-		}),
-	)
+	@UseInterceptors(fileInterceptor)
 	linkThumbnail(
 		@Param('courseId') courseId: number,
 		@UploadedFile(

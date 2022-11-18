@@ -36,16 +36,24 @@ export class CoursesService {
 		return course;
 	}
 
-	async create(createCourseDto: CreateCourseDto) {
-		const { name } = createCourseDto;
-		const course = await this.coursesRepository.findOne({ where: { name } });
+	async create(
+		createCourseDto: CreateCourseDto,
+		thumbnail: Express.Multer.File,
+	) {
+		const { title: name } = createCourseDto;
 
-		if (!course) {
-			const course = this.coursesRepository.create(createCourseDto);
-			return this.coursesRepository.insert(course);
-		}
+		if (await this.isCourseRegistered(name))
+			throw new ConflictException(`Course with name "${name}" already exists`);
 
-		throw new ConflictException(`Course with name "${name}" already exists`);
+		const course = this.coursesRepository.create(createCourseDto);
+
+		if (thumbnail) course.thumbnail = new LocalFile(thumbnail);
+
+		return this.coursesRepository.save(course);
+	}
+
+	private async isCourseRegistered(name: string) {
+		return await this.coursesRepository.findOne({ where: { title: name } });
 	}
 
 	async update(id: number, updateCourseDto: UpdateCourseDto) {
@@ -58,7 +66,6 @@ export class CoursesService {
 		const oldThumbnailId = course.thumbnailId ?? -1;
 
 		course.thumbnail = new LocalFile(file);
-		course.thumbnailId = course.thumbnail.id;
 		const res = await this.coursesRepository.save(course);
 
 		if (oldThumbnailId > -1) this.filesService.delete(oldThumbnailId);
