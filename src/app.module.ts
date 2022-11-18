@@ -19,7 +19,7 @@ import { join } from 'path';
 			synchronize: true,
 		}),
 		ServeStaticModule.forRoot({
-			rootPath: join(__dirname, '../..', 'public/dist'),
+			rootPath: join(__dirname, '../../..', 'edu-front/dist'),
 		}),
 		CoursesModule,
 		TopicsModule,
