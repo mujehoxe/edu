@@ -36,5 +36,4 @@ lerna-debug.log*
 
 
 /uploads
-
-/public
+/public/
