@@ -29,10 +29,7 @@ export class Course {
 	level: string;
 
 	@Column({ nullable: true })
-	specialty: string;
-
-	@Column({ nullable: true })
-	instructor: string;
+	speciality: string;
 
 	@CreateDateColumn()
 	createdDate: Date;

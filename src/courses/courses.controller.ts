@@ -33,6 +33,7 @@ export class CoursesController {
 		@Body() createCourseDto: CreateCourseDto,
 		@UploadedFile(
 			new ParseFilePipe({
+				fileIsRequired: false,
 				exceptionFactory(err) {
 					if (err)
 						throw new BadRequestException('Must provide a jpg, jpeg or png');

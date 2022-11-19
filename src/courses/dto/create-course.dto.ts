@@ -16,8 +16,5 @@ export class CreateCourseDto {
 	level: string;
 
 	@IsOptional()
-	specialty: string;
-
-	@IsOptional()
-	instructor: string;
+	speciality: string;
 }
