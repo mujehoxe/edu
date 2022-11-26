@@ -43,7 +43,7 @@ export class LocalFilesService {
 		return await this.filesRepository.update(id, updateLocalFileDto);
 	}
 
-	async doesFileExists(path) {
+	static async doesFileExists(path) {
 		try {
 			await fs.promises.access(path);
 			return true;
