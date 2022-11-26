@@ -57,14 +57,26 @@ export class CoursesController {
 	}
 
 	@Patch(':id')
+	@UseInterceptors(fileInterceptor)
 	async update(
 		@Param('id') id: number,
 		@Body() updateCourseDto: UpdateCourseDto,
+		@UploadedFile(
+			new ParseFilePipe({
+				fileIsRequired: false,
+				exceptionFactory(err) {
+					if (err) throw new BadRequestException('Must provide an image');
+				},
+				validators: [new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ })],
+			}),
+		)
+		file: Express.Multer.File,
 	) {
-		return this.coursesService.update(id, updateCourseDto);
+		console.log(updateCourseDto);
+		return this.coursesService.update(id, updateCourseDto, file);
 	}
 
-	@Post(':courseId/link-thumbnail')
+	@Patch(':courseId/link-thumbnail')
 	@UseInterceptors(fileInterceptor)
 	linkThumbnail(
 		@Param('courseId') courseId: number,
