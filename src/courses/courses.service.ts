@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { LocalFile } from 'src/local-files/local-file.entity';
 import { LocalFilesService } from 'src/local-files/local-files.service';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { Course } from './course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -23,41 +23,65 @@ export class CoursesService {
 	) {}
 
 	findAll(): Promise<Course[]> {
-		return this.coursesRepository.find();
+		return this.coursesRepository.find({ relations: ['thumbnail'] });
 	}
 
 	async findById(id: number): Promise<Course> {
 		const course = await this.coursesRepository.findOne({
 			where: { id },
-			relations: ['topics'],
+			relations: ['topics', 'thumbnail'],
 		});
-		if (!course) throw new NotFoundException(`Course #${id} not found`);
 
+		this.exceptionCourseNotFound(course, id);
 		return course;
+	}
+
+	private exceptionCourseNotFound(course: Course, id: number) {
+		if (!course) throw new NotFoundException(`Course #${id} not found`);
 	}
 
 	async create(
 		createCourseDto: CreateCourseDto,
 		thumbnail: Express.Multer.File,
 	) {
-		const { title: name } = createCourseDto;
-
-		if (await this.isCourseRegistered(name))
-			throw new ConflictException(`Course with name "${name}" already exists`);
+		if (thumbnail) createCourseDto.thumbnail = new LocalFile(thumbnail);
 
 		const course = this.coursesRepository.create(createCourseDto);
 
-		if (thumbnail) course.thumbnail = new LocalFile(thumbnail);
-
-		return this.coursesRepository.save(course);
+		return this.saveAndHandleErrors(course);
 	}
 
 	private async isCourseRegistered(name: string) {
 		return await this.coursesRepository.findOne({ where: { title: name } });
 	}
 
-	async update(id: number, updateCourseDto: UpdateCourseDto) {
-		await this.coursesRepository.update(id, updateCourseDto);
+	async update(
+		id: number,
+		updateCourseDto: UpdateCourseDto,
+		thumbnail: Express.Multer.File,
+	) {
+		if (thumbnail) updateCourseDto.thumbnail = new LocalFile(thumbnail);
+
+		updateCourseDto.id = id;
+
+		return this.saveAndHandleErrors(updateCourseDto);
+	}
+
+	async saveAndHandleErrors(courseData) {
+		try {
+			return await this.coursesRepository.save(courseData);
+		} catch (err) {
+			if (
+				!(err instanceof QueryFailedError) ||
+				err.driverError.code !== '23505'
+			)
+				throw err;
+
+			if (err.driverError.code === '23505')
+				throw new ConflictException(
+					`Course with name "${courseData.title}" already exists`,
+				);
+		}
 	}
 
 	async linkThumbnail(courseId: number, file: Express.Multer.File) {

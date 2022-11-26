@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { LocalFile } from 'src/local-files/local-file.entity';
 
 export class CreateCourseDto {
 	@IsString()
@@ -17,4 +18,7 @@ export class CreateCourseDto {
 
 	@IsOptional()
 	speciality: string;
+
+	@IsOptional()
+	thumbnail: LocalFile;
 }
