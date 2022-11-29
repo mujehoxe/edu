@@ -16,7 +16,7 @@ import { Topic } from './topic.entity';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('topics')
+@Controller({ path: 'topics' })
 export class TopicsController {
 	constructor(private topicsService: TopicsService) {}
 

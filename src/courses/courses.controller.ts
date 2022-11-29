@@ -23,7 +23,7 @@ const fileInterceptor = FileInterceptor('file', {
 	storage: diskStorage({ destination: 'uploads/thumbnails/' }),
 });
 
-@Controller('courses')
+@Controller({ path: 'courses' })
 export class CoursesController {
 	constructor(private coursesService: CoursesService) {}
 

@@ -1,9 +1,16 @@
-import { Controller, Get, StreamableFile, Res, Param } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	StreamableFile,
+	Res,
+	Param,
+	VERSION_NEUTRAL,
+} from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import type { Response } from 'express';
 
-@Controller('uploads')
+@Controller({ path: 'uploads', version: VERSION_NEUTRAL })
 export class LocalFilesController {
 	@Get(':filetype/:filename')
 	getFile(

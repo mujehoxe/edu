@@ -1,4 +1,4 @@
-import { RequestMethod, ValidationPipe } from '@nestjs/common';
+import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
@@ -7,8 +7,9 @@ async function bootstrap() {
 
 	app.enableCors({ origin: '*' });
 
-	app.setGlobalPrefix('v1', {
-		exclude: [{ path: 'uploads', method: RequestMethod.GET }],
+	app.enableVersioning({
+		type: VersioningType.URI,
+		defaultVersion: '1',
 	});
 
 	app.useGlobalPipes(
