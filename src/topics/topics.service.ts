@@ -65,7 +65,7 @@ export class TopicsService {
 	async linkAttachment(topicId: number, file: Express.Multer.File) {
 		const filename = this.filesService.generateFileName(
 			file,
-			'/uploads/attachments',
+			'./uploads/attachments',
 			topicId,
 		);
 
